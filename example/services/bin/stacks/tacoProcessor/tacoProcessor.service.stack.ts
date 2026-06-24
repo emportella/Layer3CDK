@@ -14,8 +14,9 @@ import {
   ServiceSSMStringParameter,
   GlobalSecrets,
   NodejsLambdaFunction,
+  S3Bucket,
 } from '@emportella/layer3cdk';
-import { App } from 'aws-cdk-lib';
+import { App, Duration } from 'aws-cdk-lib';
 import { AttributeType, Billing, Capacity } from 'aws-cdk-lib/aws-dynamodb';
 import { IAlarmAction } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -50,6 +51,9 @@ export class TacoProcessorServiceStack extends BaseStack {
 
     // DynamoDB table
     this.createOrdersTable();
+
+    // S3 bucket for order receipts
+    this.createReceiptsBucket();
 
     // Redis cache
     this.createOrderCache();
@@ -231,6 +235,32 @@ export class TacoProcessorServiceStack extends BaseStack {
     table.setCloudWatchAlarms(...this.config.alarmActions);
     table.grantPolicies(this.serviceAccount.getRole());
     table.outputArn();
+  }
+
+  // --- S3 ---
+
+  private createReceiptsBucket() {
+    const bucket = new S3Bucket(this, {
+      config: this.config,
+      bucketName: 'order-receipts',
+      // Structural passthrough: expire receipts after a retention window.
+      bucketProps: {
+        default: {
+          lifecycleRules: [{ expiration: Duration.days(90) }],
+        },
+        prd: {
+          lifecycleRules: [{ expiration: Duration.days(365) }],
+        },
+      },
+      // Library-managed config: raise the storage-growth alarm in prod.
+      bucketConfig: {
+        default: { alarmBucketSizeBytesThreshold: 10 * 1024 ** 3 },
+        prd: { alarmBucketSizeBytesThreshold: 200 * 1024 ** 3 },
+      },
+    });
+    bucket.setCloudWatchAlarms(...this.config.alarmActions);
+    bucket.grantPolicies(this.serviceAccount.getRole());
+    bucket.outputArn();
   }
 
   // --- Redis ---
