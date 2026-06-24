@@ -12,3 +12,4 @@ export * from './ecs';
 export * from './secrets';
 export * from './lambda';
 export * from './static-site-s3';
+export * from './s3';

@@ -64,7 +64,8 @@ export type ResourceType =
   | 'ecs-task-def'
   | 'lambda'
   | 'redis-replication-group'
-  | 's3-static-site';
+  | 's3-static-site'
+  | 's3';
 
 /**
  * Represents a department (business unit).
