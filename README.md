@@ -336,7 +336,7 @@ Detailed guides for each module:
 The [`example/services/`](./example/services/) directory contains a full reference implementation demonstrating every construct in the library. It models a "Taco Shop" domain with 6 stacks:
 
 - **TacoAlarmHub** — Chatbot + OpsGenie + AlarmSnsAction
-- **TacoProcessor** — DynamoDB, Redis, SQS (standard + background tasks), Lambda (NodejsFunction), SSM, Secrets, ECR
+- **TacoProcessor** — DynamoDB, Redis, S3 (general-purpose bucket), SQS (standard + background tasks), Lambda (NodejsFunction), SSM, Secrets, ECR
 - **NachoAgency** — ECS Fargate (cluster + 2 services with Cloud Map), SNS (standard + FIFO), ECR
 - **SalsaNotifier** — SQS (standard + FIFO + fan-in), DLQFifo, SSM (department), ECR
 - **GuacWarehouse** — Lambda (generic with Code.fromAsset), SQS with S3 event policy, SNS, ECR

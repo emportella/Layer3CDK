@@ -7,7 +7,7 @@ Example project demonstrating how to use [Layer3CDK](../../README.md) to define 
 ```
 TacoAlarmHub (alarm aggregation)
   |
-  +-- TacoProcessorServiceStack    (event consumer, DynamoDB, Redis, Lambda, SSM, Secrets)
+  +-- TacoProcessorServiceStack    (event consumer, DynamoDB, Redis, S3, Lambda, SSM, Secrets)
   +-- NachoAgencyServiceStack      (event publisher, ECS Fargate, Cloud Map)
   +-- SalsaNotifierServiceStack    (notification fan-in, FIFO queues, SSM)
   +-- GuacWarehouseServiceStack    (data warehouse ingestion, Lambda)
@@ -47,13 +47,14 @@ Event-driven service that processes incoming orders and state changes. Demonstra
 | SQS: BurritoSubmitted   | `AWS::SQS::Queue`                    | `dev-st-TacoProcessor-BurritoSubmitted`            |
 | Background task queue   | `AWS::SQS::Queue`                    | `dev-task-TacoProcessor-RecalculateTacoScore`      |
 | DynamoDB table          | `AWS::DynamoDB::GlobalTable`         | `dev-TacoProcessor-Orders`                         |
+| S3 bucket               | `AWS::S3::Bucket`                    | `dev-taco-processor-order-receipts`                |
 | Redis cluster           | `AWS::ElastiCache::ReplicationGroup` | `dev-pltf-TacoProcessor`                           |
 | SSM (global)            | `AWS::SSM::Parameter`                | `/dev/global/taco-api-base-url`                    |
 | SSM (service)           | `AWS::SSM::Parameter`                | `/dev/taco-processor/max-concurrent-orders`        |
 | Secret                  | `AWS::SecretsManager::Secret`        | `taco-db-credentials`                              |
 | Lambda (NodejsFunction) | `AWS::Lambda::Function`              | `dev-TacoProcessor-CalculateTacoScore`             |
 | Lambda LogGroup         | `AWS::Logs::LogGroup`                | `/aws/lambda/dev-TacoProcessor-CalculateTacoScore` |
-| CloudWatch alarms       | `AWS::CloudWatch::Alarm`             | 19 alarms (DLQ, queues, DynamoDB, Lambda)          |
+| CloudWatch alarms       | `AWS::CloudWatch::Alarm`             | 20 alarms (DLQ, queues, DynamoDB, S3, Lambda)      |
 
 ### NachoAgencyServiceStack (`nacho-agency`)
 
@@ -142,6 +143,7 @@ Every construct in the library is demonstrated in this example:
 | `SnsTopicFifo`                               | NachoAgency                                              |
 | `DynamoTable`                                | TacoProcessor                                            |
 | `RedisReplicationGroup`                      | TacoProcessor                                            |
+| `S3Bucket` (general-purpose)                 | TacoProcessor                                            |
 | `NodejsLambdaFunction`                       | TacoProcessor                                            |
 | `LambdaFunction` (generic)                   | GuacWarehouse                                            |
 | `EcsCluster`                                 | NachoAgency                                              |
@@ -182,6 +184,7 @@ This sets the team and department for all stacks via `BaseStackConfig`. Individu
 - **S3 → SQS event notification** with resource-based policy for cross-account access
 - **ECR repository** per service with environment-aware prefixing
 - **DynamoDB** with env-specific provisioned capacity and alarms
+- **S3** (`S3Bucket`) — general-purpose secure bucket with env-aware lifecycle rules and a storage-growth alarm
 - **Redis** with cluster mode and multi-AZ in production
 - **Lambda** — both generic (`LambdaFunction` with `Code.fromAsset`) and Node.js (`NodejsLambdaFunction` with esbuild bundling)
 - **ECS Fargate** — shared cluster with multiple services, Cloud Map service discovery, auto-scaling
