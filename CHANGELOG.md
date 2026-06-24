@@ -13,6 +13,12 @@ Given a version number `MAJOR.MINOR.PATCH`, increment the:
 
 Dates are in [ISO-8601](https://en.wikipedia.org/wiki/ISO-8601).
 
+## [0.2.0] - 2026-06-24
+
+#### Added
+
+- S3 construct: `S3Bucket` — general-purpose, secure-by-default S3 bucket (all public access blocked, SSL enforced, S3-managed encryption, bucket-owner-enforced ownership). Uses the two-layer props pattern (`S3Props` structural passthrough + `S3Config` library-managed config), environment-aware defaults, production validations (retain on delete, versioning enabled, no auto-delete), a `BucketSizeBytes` storage-growth CloudWatch alarm, and IAM grant helpers (`grantPolicies`, `grantReadOnlyPolicies`, `grantCustomPolicies`).
+
 ## [0.1.2] - 2026-05-12
 
 #### Changed
