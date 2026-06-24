@@ -169,6 +169,7 @@ queue.grantPolicies(serviceAccount.getRole());
 | **IAM**            | `ServiceAccountRole`                                                                    | EKS OIDC-federated service account roles                                                                                                                    |
 | **SSM**            | `GlobalSSMStringParameter`, `DepartmentSSMStringParameter`, `ServiceSSMStringParameter` | Scoped parameter store entries (global, department, service)                                                                                                |
 | **Secrets**        | `GlobalSecrets`                                                                         | Secrets Manager secrets                                                                                                                                     |
+| **S3**             | `S3Bucket`                                                                              | General-purpose secure-by-default buckets with prod guardrails and a storage-growth alarm                                                                   |
 | **Static Site S3** | `SSS3`                                                                                  | S3 + CloudFront + ACM + Route 53 + optional WAF + API proxying for static sites and SPAs                                                                    |
 | **Alarms**         | `ChatbotSlackChannnel`, `OpsGenie`, `AlarmSnsAction`                                    | Alarm routing to Slack, OpsGenie, or any SNS topic                                                                                                          |
 | **Config**         | `EksClusterConfig`                                                                      | EKS cluster OIDC and namespace configuration                                                                                                                |
@@ -274,6 +275,7 @@ Constructs ship with CloudWatch alarms that reflect real operational concerns:
 | **DLQ**         | Any message landing in the dead-letter queue            |
 | **Lambda**      | Errors, duration, throttles                             |
 | **ECS Fargate** | CPU utilization, memory utilization, running task count |
+| **S3**          | Bucket size (storage-growth guardrail)                  |
 
 Pass an alarm action (Slack, OpsGenie, or any SNS action) to wire notifications:
 
@@ -322,6 +324,7 @@ Detailed guides for each module:
 | [IAM](./docs/iam.md)                       | Service account roles, EKS OIDC federation                                                             |
 | [SSM](./docs/ssm.md)                       | Global, department, and service-scoped parameters                                                      |
 | [Secrets](./docs/secrets.md)               | Secrets Manager secrets                                                                                |
+| [S3](./docs/s3.md)                         | General-purpose secure buckets, two-layer props, production validations, storage alarm                 |
 | [Static Site S3](./docs/static-site-s3.md) | S3 + CloudFront + ACM + Route 53, SPA support, API proxying, WAF integration                           |
 | [Alarms](./docs/alarms.md)                 | Slack (Chatbot), OpsGenie, SNS action imports                                                          |
 | [Config](./docs/config.md)                 | EKS cluster configuration                                                                              |
@@ -358,6 +361,7 @@ src/
   iam/                           # IAM service account role construct
   ssm/                           # SSM parameter constructs
   secrets/                       # Secrets Manager construct
+  s3/                            # General-purpose S3 bucket construct
   alarms/                        # Alarm routing (Slack, OpsGenie, SNS)
   config/                        # EKS cluster configuration
   static-site-s3/                # SSS3: S3 + CloudFront + ACM + Route 53 + WAF
@@ -384,7 +388,7 @@ index.ts                         # Barrel exports
 ```bash
 pnpm install         # Install dependencies
 pnpm run build       # TypeScript compilation (tsc -> dist/)
-pnpm run test        # Run tests (314 tests across 38 suites)
+pnpm run test        # Run tests (328 tests across 40 suites)
 pnpm run test:cov    # Run tests with coverage (thresholds: 75/75/60/75)
 pnpm run lint        # ESLint check
 pnpm run lint:fix    # ESLint + Prettier auto-fix
